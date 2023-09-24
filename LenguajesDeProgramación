@@ -1,28 +1,20 @@
 import re
 
-# Inicializa una variable para almacenar las líneas de entrada
-entradas = []
-
-# Ciclo para ingresar múltiples líneas de texto
-while True:
-    linea = input("Ingrese una línea de texto (o presione Enter para finalizar): ")
-    
-    # Verifica si la línea está vacía (el usuario presionó Enter sin escribir nada)
-    if not linea:
-        break
-    
-    # Agrega la línea a la lista de entradas
-    entradas.append(linea)
-
-# Convierte la lista de entradas en una sola cadena de texto
-entrada_completa = '\n'.join(entradas)
-
-# Ahora tienes toda la entrada en la variable "entrada_completa"
-print("Entrada completa:")
-print(entrada_completa)
-
 # Define una lista de palabras reservadas en minúsculas
-palabras_reservadas = ["escriba", "mientras", "lea", "o", "real", "y", "nueva_linea", "haga", "repita", "entonces", "inicio", "fin"]
+palabras_reservadas = [
+    "escriba", 
+    "mientras", 
+    "lea", 
+    "o", 
+    "real", 
+    "y", 
+    "nueva_linea", 
+    "haga", 
+    "repita", 
+    "entonces", 
+    "inicio", 
+    "fin"
+]
 
 # Define un diccionario para mapear símbolos y operadores a sus nombres de token
 mapeo_simbolos = {
@@ -47,47 +39,43 @@ mapeo_simbolos = {
     '>=': 'geq'
 }
 
-# Solicitar entrada al usuario
-entrada = input("Ingrese una cadena de texto: ").lower()
-
-# Dividir el texto en líneas
-lineas = entrada.split("\n")
-
 # Inicializar el número de línea
 num_linea = 1
 
-# Recorrer cada línea
-for linea in lineas:
+# Ciclo para ingresar múltiples líneas de texto
+while True:
+    # Solicitar entrada al usuario
+    entrada = input("Ingrese una cadena de texto: ").lower()
+
     # Variables para seguimiento de errores léxicos
     posicion_actual = 0
 
-    while posicion_actual < len(linea):
-        print(posicion_actual, " posicion actual")
-        # Intentar encontrar un token válido desde la posición actual
-        match = re.match(r"[a-zA-Z_]\w*|\"[^\"]*\"|\S+", linea[posicion_actual:])
-        if match:
-            token = match.group()
-            inicio = posicion_actual + match.start() + 1  # +1 para compensar la indexación de Python
-            fin = posicion_actual + match.end()
+    # Intentar encontrar un token válido desde la posición actual
+    match = re.match(r"[a-zA-Z_]\w*|\"[^\"]*\"|\S+", entrada[posicion_actual:])
+    print(match, "match")
+    if match:
+        token = match.group()
+        inicio = posicion_actual + match.start() + 1  # +1 para compensar la indexación de Python
+        fin = posicion_actual + match.end()
 
-            # Identificar si el token es una palabra reservada (en minúsculas)
-            if token in palabras_reservadas:
-                print(f"<palabra_reservada,{num_linea},{inicio}>")
-            elif token in mapeo_simbolos:
-                nombre_token = mapeo_simbolos[token]
-                print(f"<tkn_{nombre_token},{num_linea},{inicio}>")
-            elif re.match(r'"[^"]*"', token):  # Token es una cadena
-                print(f"<tkn_str,{token},{num_linea},{inicio}>")
-            else:
-                # Error léxico
-                print(f">>> Error lexico (linea: {num_linea}, posicion: {inicio})")
-
-            # Actualizar la posición actual
-            posicion_actual = fin
+        # Identificar si el token es una palabra reservada (en minúsculas)
+        if token in palabras_reservadas:
+            print(f"<palabra_reservada,{num_linea},{inicio}>")
+        elif token in mapeo_simbolos:
+            nombre_token = mapeo_simbolos[token]
+            print(f"<tkn_{nombre_token},{num_linea},{inicio}>")
+        elif re.match(r'"[^"]*"', token):  # Token es una cadena
+            print(f"<tkn_str,{token},{num_linea},{inicio}>")
         else:
-            # Si no se encuentra un token válido, marcar un error léxico y avanzar
-            print(f">>> Error lexico (linea: {num_linea}, posicion: {posicion_actual + 1})")
-            posicion_actual += 1
+            # Error léxico
+            print(f">>> Error lexico (linea: {num_linea}, posicion: {inicio})")
+
+        # Actualizar la posición actual
+        posicion_actual = fin
+    else:
+        # Si no se encuentra un token válido, marcar un error léxico y avanzar
+        print(f">>> Error lexico (linea: {num_linea}, posicion: {posicion_actual + 1})")
+        posicion_actual += 1
 
     # Incrementar el número de línea
     num_linea += 1
