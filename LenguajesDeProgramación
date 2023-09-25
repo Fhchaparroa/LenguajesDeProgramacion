@@ -2,18 +2,23 @@ import re
 
 # Define una lista de palabras reservadas en minúsculas
 palabras_reservadas = [
-    "escriba", 
-    "mientras", 
-    "lea", 
-    "o", 
-    "real", 
-    "y", 
-    "nueva_linea", 
-    "haga", 
-    "repita", 
-    "entonces", 
-    "inicio", 
-    "fin"
+    "escriba",
+    "mientras",
+    "lea",
+    "o",
+    "real",
+    "y",
+    "nueva_linea",
+    "haga",
+    "repita",
+    "entonces",
+    "inicio",
+    "fin",
+    "si",
+    "entero",
+    "caso",
+    "falso",
+    "verdadero"
 ]
 
 # Define un diccionario para mapear símbolos y operadores a sus nombres de token
@@ -40,42 +45,118 @@ mapeo_simbolos = {
 }
 
 # Inicializar el número de línea
-num_linea = 1
+num_linea = 0
+numero = 0
 
-# Ciclo para ingresar múltiples líneas de texto
+# Encontrar comentarios
+comentario = False
+bloque_comentario = False
+
 while True:
     # Solicitar entrada al usuario
-    entrada = input("Ingrese una cadena de texto: ").lower()
+    numero += 1
+    entrada_original = input()
+    entrada = entrada_original.lower()
+    print(entrada, numero)
 
     # Variables para seguimiento de errores léxicos
     posicion_actual = 0
 
-    # Intentar encontrar un token válido desde la posición actual
-    match = re.match(r"[a-zA-Z_]\w*|\"[^\"]*\"|\S+", entrada[posicion_actual:])
-    print(match, "match")
-    if match:
-        token = match.group()
-        inicio = posicion_actual + match.start() + 1  # +1 para compensar la indexación de Python
-        fin = posicion_actual + match.end()
-
-        # Identificar si el token es una palabra reservada (en minúsculas)
-        if token in palabras_reservadas:
-            print(f"<palabra_reservada,{num_linea},{inicio}>")
-        elif token in mapeo_simbolos:
-            nombre_token = mapeo_simbolos[token]
-            print(f"<tkn_{nombre_token},{num_linea},{inicio}>")
-        elif re.match(r'"[^"]*"', token):  # Token es una cadena
-            print(f"<tkn_str,{token},{num_linea},{inicio}>")
-        else:
-            # Error léxico
-            print(f">>> Error lexico (linea: {num_linea}, posicion: {inicio})")
-
-        # Actualizar la posición actual
-        posicion_actual = fin
-    else:
-        # Si no se encuentra un token válido, marcar un error léxico y avanzar
-        print(f">>> Error lexico (linea: {num_linea}, posicion: {posicion_actual + 1})")
-        posicion_actual += 1
-
     # Incrementar el número de línea
     num_linea += 1
+
+    while posicion_actual < len(entrada):
+        posicion_comentario = None
+        posicion_comentario_inicio = None
+        posicion_comentario_final = None
+        # Buscar la posición de "//"
+        match = re.search(r'//', entrada)
+        if match:
+            posicion_comentario = match.start()
+
+        # Buscar la posición de "/*"
+        match = re.search(r'/\*', entrada)
+        if match:
+            posicion_comentario_inicio = match.start()
+
+        # Buscar la posición de "*/"
+        match = re.search(r'\*/', entrada)
+        if match:
+            posicion_comentario_final = match.start()
+
+        # Combina todos los operadores y símbolos definidos en mapeo_simbolos,
+        # ordenados por longitud de cadena de mayor a menor
+        simbolos_ordenados = sorted(mapeo_simbolos.keys(), key=lambda x: len(x), reverse=True)
+        simbolos_regex = '|'.join(re.escape(simbolo) for simbolo in simbolos_ordenados)
+
+        # Expresión regular para buscar tokens
+        expresion_regular = (
+            r"<-|" + simbolos_regex + r"|[-+]?\d+\.\d+|[-+]?\d+|'[^']'|\"[^\"]*\"|\S+"
+        )
+
+        # Buscar el siguiente token
+        match = re.match(expresion_regular, entrada[posicion_actual:])
+
+        if (
+            posicion_actual == posicion_comentario
+            or posicion_actual == posicion_comentario_inicio
+            or (posicion_actual == posicion_comentario_final and bloque_comentario)
+        ):
+            if posicion_actual == posicion_comentario:
+                posicion_comentario = False
+                posicion_actual = len(entrada)
+                break
+            elif (
+                posicion_actual == posicion_comentario_inicio
+                and bloque_comentario == False
+            ):
+                bloque_comentario = True
+                posicion_actual = len(entrada)
+                break
+            elif (
+                posicion_actual == posicion_comentario_final
+                and bloque_comentario == True
+            ):
+                bloque_comentario = False
+                posicion_comentario_final = False
+                posicion_actual = len(entrada)
+                break
+        elif match and bloque_comentario == False:
+            token = match.group()
+            inicio = posicion_actual + match.start() + 1  # +1 para compensar la indexación de Python
+            fin = posicion_actual + match.end()
+
+            # Identificar si el token es una palabra reservada (en minúsculas)
+            if token in palabras_reservadas:
+                print(f"<{token},{num_linea},{inicio}>")
+            elif token in mapeo_simbolos:
+                nombre_token = mapeo_simbolos[token]
+                print(f"<tkn_{nombre_token},{num_linea},{inicio}>")
+            elif re.match(r"'[^']'", token):  # Token es un carácter
+                lexema = entrada_original[inicio + 1]  # Obtener el lexema del carácter sin las comillas
+                print(f"<tkn_char,{lexema},{num_linea},{inicio}>")
+            elif re.match(r'"[^\"]*"', token):  # Token es una cadena
+                lexema = entrada_original[inicio - 1:fin]  # Obtener el lexema desde la entrada original
+                lexema = lexema[1:-1]  # Eliminar las comillas del principio y el final
+                print(f"<tkn_str,{lexema},{num_linea},{inicio}>")
+            elif re.match(r'[-+]?\d+\.\d+', token):  # Token es un número real
+                lexema = token
+                print(f"<tkn_real,{lexema},{num_linea},{inicio}>")
+            elif re.match(r'[-+]?\d+', token):  # Token es un número entero
+                lexema = token
+                print(f"<tkn_integer,{lexema},{num_linea},{inicio}>")
+            else:
+                # Asignación variable
+                print(f"<id,{token},{num_linea},{inicio}>")
+            # Actualizar la posición actual
+            posicion_actual = fin
+        elif match and bloque_comentario == True:
+            posicion_actual += 1
+            continue
+        elif entrada[posicion_actual] == " ":
+            posicion_actual += 1
+        else:
+            # Si no se encuentra un token válido, marcar un error léxico y avanzar
+            print(f">>> Error lexico (linea: {num_linea}, posicion: {posicion_actual + 1})")
+            posicion_actual += 1
+        
