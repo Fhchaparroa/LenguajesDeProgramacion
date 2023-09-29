@@ -1,0 +1,64 @@
+import re
+
+# Define una lista de palabras reservadas en minúsculas
+palabras_reservadas = [
+    "escriba",
+    "mientras",
+    "lea",
+    "o",
+    "real",
+    "y",
+    "nueva_linea",
+    "haga",
+    "repita",
+    "entonces",
+    "inicio",
+    "fin",
+    "si",
+    "entero",
+    "caso",
+    "falso",
+    "verdadero"
+]
+
+# Define un diccionario para mapear símbolos y operadores a sus nombres de token
+mapeo_simbolos = {
+    '->': 'assign',
+    '<-': 'assign',
+    '<=': 'leq',
+    '>=': 'geq',
+    '<>': 'neq',
+    '+': 'plus',
+    '-': 'minus',
+    '*': 'times',
+    '/': 'div',
+    '^': 'power',
+    '=': 'equal',
+    '<': 'less',
+    '>': 'greater',
+    '.': 'period',
+    ',': 'comma',
+    ':': 'colon',
+    ']': 'closing_bra',
+    '[': 'opening_bra',
+    ')': 'closing_par',
+    '(': 'opening_par',
+}
+
+tokens = []
+
+#cadena = "no hay  nada    aca <-<>==<-<="
+cadena = "   "
+
+# Combina los operadores y símbolos definidos en mapeo_simbolos
+simbolos = '|'.join(re.escape(simbolo) for simbolo in mapeo_simbolos.keys())
+
+# Utiliza una expresión regular para dividir la cadena en palabras y símbolos
+patron = f"(''|\s+|{simbolos})"
+elementos = re.split(patron, cadena)
+
+# Elimina los elementos vacíos de la lista resultante
+elementos = [elem for elem in elementos if elem.strip() != '']
+
+# Imprime la lista de elementos resultante
+print(elementos)
