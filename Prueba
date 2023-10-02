@@ -18,7 +18,14 @@ palabras_reservadas = [
     "entero",
     "caso",
     "falso",
-    "verdadero"
+    "verdadero",
+    "sino",
+    "hasta",
+    "para",
+    "var",
+    "retorne",
+    "cadena",
+    "funcion"
 ]
 
 # Define un diccionario para mapear símbolos y operadores a sus nombres de token
@@ -45,17 +52,62 @@ mapeo_simbolos = {
     '(': 'opening_par',
 }
 
-tokens = []
+# Inicializar el número de línea
+num_linea = 0
+numero = 0
 
-cadena = "no hay  nada    aca <-<>==<-<="
-#cadena = "   "
+# Encontrar comentarios
+comentario = False
+bloque_comentario = False
 
-# Combina los operadores y símbolos definidos en mapeo_simbolos
+#Establecer patron busqueda
 simbolos = '|'.join(re.escape(simbolo) for simbolo in mapeo_simbolos.keys())
+patron = f"[\s+]|[a-zA-Z]+|{simbolos}|'[^']'"
 
-# Utiliza una expresión regular para dividir la cadena en palabras y símbolos
-patron = f'[\s+]|[a-zA-Z]+|{simbolos}'
-elementos = re.findall(patron, cadena)
+while True:
+    # Solicitar entrada al usuario
+    #no hay  nada    aca <-<>==<-<=
+    numero += 1
+    entrada_original = input()
+    entrada = entrada_original.lower()
+    print(entrada, numero)
+    elementos = re.findall(patron, entrada)
+    print(elementos)
 
-# Imprime la lista de elementos resultante
-print(elementos)
+    # Variables para seguimiento de errores léxicos
+    posicion_actual = 0
+
+    # Incrementar el número de línea
+    num_linea += 1
+    
+    for elemento in elementos:
+        #print("posicion_actual: ",posicion_actual)
+        #print("Lenght: ",len(elemento))
+        if re.match(r"[a-zA-Z]+",elemento): #elemento es una variable
+            print(f"<{elemento},{num_linea},{posicion_actual}>")
+            posicion_actual=len(elemento)+posicion_actual
+        elif re.match(f"{simbolos}",elemento): #elemento es un simbolo
+            print(f"<tkn_{mapeo_simbolos[elemento]},{num_linea},{posicion_actual}>")
+            posicion_actual=len(elemento)+posicion_actual
+        elif re.match(r'"[^\"]*"', elemento):  #elemento es una cadena
+            lexema = entrada_original[inicio - 1:fin]
+            lexema = lexema[1:-1]
+            print(f"<tkn_str,{lexema},{num_linea},{posicion_actual}>")
+            posicion_actual=len(elemento)+posicion_actual
+        elif re.match(r'[-+]?\d+(\.\d+)?', elemento):  #elemento es un número
+            if '.' in elemento:
+                lexema = elemento
+                print(f"<tkn_real,{lexema},{num_linea},{posicion_actual}>")
+                posicion_actual=len(elemento)+posicion_actual
+            else:
+                lexema = elemento
+                print(f"<tkn_integer,{lexema},{num_linea},{posicion_actual}>")
+                posicion_actual=len(elemento)+posicion_actual
+        elif re.match(r"'[^']'",elemento): #elemento es un caracter
+            print(f"<tkn_char,{elemento},{num_linea},{posicion_actual}>")
+            posicion_actual=len(elemento)+posicion_actual
+        elif re.match("[\s+]",elemento): #elemento es un espacio en blanco
+            posicion_actual=len(elemento)+posicion_actual
+        else:
+            print("Ni idea :v ",elemento)
+            posicion_actual=len(elemento)+posicion_actual
