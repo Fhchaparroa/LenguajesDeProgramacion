@@ -23,7 +23,19 @@ palabras_reservadas = [
 
 # Define un diccionario para mapear símbolos y operadores a sus nombres de token
 mapeo_simbolos = {
+    '->': 'assign',
     '<-': 'assign',
+    '<=': 'leq',
+    '>=': 'geq',
+    '<>': 'neq',
+    '+': 'plus',
+    '-': 'minus',
+    '*': 'times',
+    '/': 'div',
+    '^': 'power',
+    '=': 'equal',
+    '<': 'less',
+    '>': 'greater',
     '.': 'period',
     ',': 'comma',
     ':': 'colon',
@@ -31,17 +43,6 @@ mapeo_simbolos = {
     '[': 'opening_bra',
     ')': 'closing_par',
     '(': 'opening_par',
-    '+': 'plus',
-    '-': 'minus',
-    '*': 'times',
-    '/': 'div',
-    '^': 'power',
-    '=': 'equal',
-    '<>': 'neq',
-    '<': 'less',
-    '<=': 'leq',
-    '>': 'greater',
-    '>=': 'geq'
 }
 
 # Inicializar el número de línea

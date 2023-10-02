@@ -47,18 +47,15 @@ mapeo_simbolos = {
 
 tokens = []
 
-#cadena = "no hay  nada    aca <-<>==<-<="
-cadena = "   "
+cadena = "no hay  nada    aca <-<>==<-<="
+#cadena = "   "
 
 # Combina los operadores y símbolos definidos en mapeo_simbolos
 simbolos = '|'.join(re.escape(simbolo) for simbolo in mapeo_simbolos.keys())
 
 # Utiliza una expresión regular para dividir la cadena en palabras y símbolos
-patron = f"(''|\s+|{simbolos})"
-elementos = re.split(patron, cadena)
-
-# Elimina los elementos vacíos de la lista resultante
-elementos = [elem for elem in elementos if elem.strip() != '']
+patron = f'[\s+]|[a-zA-Z]+|{simbolos}'
+elementos = re.findall(patron, cadena)
 
 # Imprime la lista de elementos resultante
 print(elementos)
