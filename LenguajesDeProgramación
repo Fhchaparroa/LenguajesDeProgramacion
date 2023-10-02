@@ -56,7 +56,12 @@ bloque_comentario = False
 while True:
     # Solicitar entrada al usuario
     numero += 1
-    entrada_original = input()
+    
+    try:
+        entrada_original = input()
+    except:
+        break
+    
     entrada = entrada_original.lower()
     print(entrada, numero)
 
